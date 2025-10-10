@@ -1,0 +1,50 @@
+(* ::Package:: *)
+
+(* ::Section:: *)
+(*Load*)
+
+
+$dir = If[$FrontEnd=!=Null,NotebookDirectory[],DirectoryName[$InputFileName]];
+SetDirectory[$dir]
+
+
+<<PolyLogTools`
+
+
+(*Loading analytic expressions for boundary values of topology T3*)
+
+
+Do[
+f[ToExpression[i]]=Get["f"<>i<>".m"];
+,{i,{"1","2","4","6","8","9","13","15","16","17"}}]
+
+
+(* ::Section:: *)
+(*Boundary Evaluation*)
+
+
+(* ::Subsection:: *)
+(*Direct Integration*)
+
+
+(*The Prec variable sets the precision of the evaluation of the boundaries*)
+
+
+Prec=16;
+
+
+(*Evaluate numerically the boundaries with Ginac*)
+
+
+Do[
+b[i]=Table[Ginsh[f[i][[1]][[k]]/.f[i][[2]],{},PrecisionGoal->Prec],{k,5}];
+,{i,{1,2,4,6,8,9,13,15,16,17}}]
+
+
+boundAnNum={b[1],b[2],b[4],b[6],b[8],b[9],b[13],b[15],b[16],b[17]};
+
+
+(*Store numerical evaluation of the analytically computed boundary values*)
+
+
+Export["boundAnNum.m",boundAnNum];
