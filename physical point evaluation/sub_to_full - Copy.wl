@@ -19,10 +19,11 @@ mdot[a_, b_] := a[[1]]b[[1]]-a[[2]]b[[2]]-a[[3]]b[[3]]-a[[4]]b[[4]];
 
 p3v = -{243.958874340707, 0, 0, 243.958874340707};
 p4v = -{243.274422280898, 0, 0, -243.274422280898};
-p5v = {72.4210128964652, 50.6623055703701, 44.0522222052368, 27.1576070747199};
+p5v = SetPrecision[{72.4210128964652, 50.6623055703701, 44.0522222052368, 27.1576070747199},50];
 p1v = {202.733585822752, -81.9445526000469, 60.951575089163, 30.2432242639469};
 p2v = {212.078697902388, 31.2822470296768, -105.0037972944, -56.7163792788578};
 
+(*mdot[p5v,p5v]*)
 (*p1v = {451.16038194215792601, -254.95547824215555011, -127.96321306901207038, -303.88644976300315648};
 p2v = {181.67424764458991149, 46.833603697807077992, -3.1743236745347509498, 31.308679165908877451};
 p3v = -{500., 0, 0, 500.};
@@ -31,17 +32,23 @@ p5v = {367.16537041325221935, 208.12187454434831579, 131.13753674354686041, 272.
 
 mtv = Sqrt[mdot[p1v,p1v]];
 
-ni = {100.,100.,0,0};
+ni = SetPrecision[{100.,100.,0,0},50];
 Rot[a_, b_, c_] := {{1, 0, 0, 0}, {0, Cos[b]Cos[c], Sin[a]Sin[b]Cos[c]-Cos[a]Sin[c], Cos[a]Sin[b]Cos[c]+Sin[a]Sin[c]},{0, Cos[b]Sin[c], Sin[a]Sin[b]Sin[c]+Cos[a]Cos[c], Cos[a]Sin[b]Sin[c]-Sin[a]Cos[c]},{0, -Sin[b], Sin[a]Cos[b], Cos[a]Cos[b]}};
-rot1v = N[Rot[SetPrecision[0.,50],SetPrecision[0.2,50],SetPrecision[0.8,50]],50];
-(*rot2v = N[Rot[SetPrecision[0.2,50],SetPrecision[0.2,50],SetPrecision[0.5,50]],50];*)
-rot2v = rot1v;
+rot1v = N[Rot[SetPrecision[0.,50],SetPrecision[0.4,50],SetPrecision[0.,50]],50];
+rot2v = N[Rot[SetPrecision[0.2,50],SetPrecision[0.9,50],SetPrecision[0.5,50]],50];
+(*rot2v = rot1v;*)
 
 n1v = rot1v . ni;
 n2v = rot2v . ni;
 
-f1v = p1v - mdot[p1v, p1v]/(2*mdot[p1v, n1v]) * n1v;
-f2v = p2v - mdot[p2v, p2v]/(2*mdot[p2v, n2v]) * n2v;
+f1v = SetPrecision[p1v - mdot[p1v, p1v]/(2*mdot[p1v, n1v]) * n1v,50];
+f2v = SetPrecision[p2v - mdot[p2v, p2v]/(2*mdot[p2v, n2v]) * n2v,50];
+
+projMassless[v_] := With[{sp = v[[2;;4]], E = Norm[v[[2;;4]]]}, Flatten[{E, sp}]];
+
+(*f1v = projMassless[f1v];
+f2v = projMassless[f2v];
+p5v = projMassless[p5v];*)
 
 
 (*result is n1, n2 dependent ???*)
@@ -73,12 +80,13 @@ dijvalues = {d12->mdot[p1v,p2v], d23->mdot[p2v,p3v], d34->mdot[p3v,p4v], d45->md
 (*Print[dijvalues2];
 Print[dijvalues];*)
 
+Clear[f1,f2,n1,n2, p3, p4, p5, m3, m4, m5];
 spin = {f1,f2,n1,n2,p3,p4,p5};
 spinv = {f1v,f2v,n1v,n2v,p3v,p4v,p5v};
 (*spinv = {f1vt,f2vt,n1vt,n2vt,p3v,p4v,p5v};*)
 
 (*final ampsquare scales with norm2 --> scales with Mass^-2 (expected for 2->5)*)
-norm2 = 1;
+norm2 = 1.;
 norm = Sqrt[norm2];
 
 spinvn = spinv/norm;
@@ -139,24 +147,27 @@ ncpowlist["Nhd12T453"] = {"Ncp-1"};
 ncpowlist["Nhd34T251"] = {"Ncp-1"};
 
 
-Clear[f1,f2,n1,n2, p3, p4, p5, m3, m4, m5];
 DeclareSpinor[f1,f2,n1,n2,p3,p4,p5]
 
 Do[
 DeclareSpinorMomentum[spin[[i]], spinvn[[i]]];
 ,{i,{1,2,3,4,5,6,7}}];
 
-phasemp = mtvn*Spaa[p3,p4]/(Spaa[p4,p5]^2)//N;
-phasepm = mtvn*Spaa[p3,p4]/(Spaa[p3,p5]^2)//N;
+phasemp = mtvn*Spaa[p3,p4]/(Spaa[p4,p5]^2)
+phasepm = mtvn*Spaa[p3,p4]/(Spaa[p3,p5]^2)
 
-Print["Phi = ", phasemp];
-Print["Spinorprod = ", Spaa[p3,p4]//N];
+Print["Phi = ", phasemp//N];
+Print["Spinorprod = ", Spaa[f1,p5]//N];
+Print["Spinorprod- = ", Spaa[p4,p3]//N];
+Print["Angleprod = ", Spbb[p3,p4]//N];
+Print[Spaa[f1,p5]*Spbb[p5,f1]/(2*mdot[f1v,p5v])//N];
+Print[Spaa[p3,p4]*Spbb[p4,p3]/(2*mdot[p3v,p4v])//N];
 Print["Spinorprod pp = ", Spbb[p3,p4,p5,p3]//N];
 
-theta1 = Spaa[n1,n2]*s34vn/Spaa[f1,n1]/Spaa[f2,n2]//N;
-theta2 = Spaa[n1,p3]*Spaa[n2,p4]*Spbb[p3,p4]/Spaa[f1,n1]/Spaa[f2,n2]//N;
-theta3 = Spaa[n1,p3]*Spaa[n2,p3]*Spbb[p3,p4,p5,p3]/s34vn/Spaa[f1,n1]/Spaa[f2,n2]//N;
-theta4 = Spaa[n1,p4]*Spaa[n2,p4]*Spbb[p4,p5,p3,p4]/s34vn/Spaa[f1,n1]/Spaa[f2,n2]//N;
+theta1 = Spaa[n1,n2]*s34vn/Spaa[f1,n1]/Spaa[f2,n2]
+theta2 = Spaa[n1,p3]*Spaa[n2,p4]*Spbb[p3,p4]/Spaa[f1,n1]/Spaa[f2,n2]
+theta3 = Spaa[n1,p3]*Spaa[n2,p3]*Spbb[p3,p4,p5,p3]/s34vn/Spaa[f1,n1]/Spaa[f2,n2]
+theta4 = Spaa[n1,p4]*Spaa[n2,p4]*Spbb[p4,p5,p3,p4]/s34vn/Spaa[f1,n1]/Spaa[f2,n2]
 
 theta = {theta1, theta2, theta3, theta4};
 
@@ -170,7 +181,7 @@ Print[theta33];
 Print[theta3];*)
 
 (* Gram to test n1,n2 dependence *)
-(* Print[Outer[Times, theta, theta]]; *)
+ (*Print[Outer[Times, Conjugate[theta], theta]//N];*)
 
 
 Clear[CT];
@@ -239,8 +250,8 @@ e2mp = phasemp*theta . (e2mp // Normal)[[All,2]];
 e3mp = phasemp*theta . (e3mp // Normal)[[All,2]];
 e4mp = phasemp*theta . (e4mp // Normal)[[All,2]];
 
-ampspm = {e1pm, e2pm, e3pm, e4pm};
-ampsmp = {e1mp, e2mp, e3mp, e4mp};
+ampspm = {e1pm, e2pm, e3pm, e4pm}//N;
+ampsmp = {e1mp, e2mp, e3mp, e4mp}//N;
 Print["amps up to color ", ampspm, ampsmp];
 
 epm2 = Rule[M["+++-+"], Sum[Conjugate[ampspm[[i]]]*Gij[i, j]*ampspm[[j]], {i,1,4}, {j,1,4}]]
@@ -348,7 +359,5 @@ N@Spbbb[p3, p4]
 mdot[a_, b_] := a[[1]] b[[1]] - a[[2]] b[[2]] - a[[3]] b[[3]] - a[[4]] b[[4]];
 { N[Spaa[p3,p4] Spbbb[p4,p3]], N[2 mdot[p3v,p4v]] }
 *)
-
-
 
 
