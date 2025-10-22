@@ -101,7 +101,8 @@ DiffExpBC=PrepareBoundaryConditions[boundary,point];
 (*point where we want to evaluate the amplitude*)
 
 
-point1=<|d12->0.1030127934867479,d23->-0.07518278423934056,d34->0.5,d45->-0.319871570505173,d15->0.31832575235540994,mt2->0.029821836099999898|>;
+dijvalues = SetPrecision[Get["C:/Users/Laptop von Ruben/Desktop/Masterthesis local/physical point evaluation/dij.m"],16]
+point1=<|dijvalues[[1]],dijvalues[[2]],dijvalues[[3]],dijvalues[[4]],dijvalues[[5]],dijvalues[[6]]|>
 
 
 (*TransportTo: main command of DiffExp, it evolves the boundaries DiffExpBC to the value=point*)
